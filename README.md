@@ -96,16 +96,11 @@ The goal here is to generalize the core ideas I've learned into a reusable, gene
 Notes: 
 - How can I work with validation loops? E.g.,
   > ```liquid
-  > {% if errors.size > 0 %}
-  > <message role="system">
-  > Follow these instructions:
-  > 1. Take heed of the following schema:
-  > 
-  > {{json_schema}}
-  > 
-  > 2. The task remains: populate the requested JSON object following the provided schema and then return the compiled data.
-  > 
-  > Hint: we do not want the schema but the data the schema represents.
+  > {% for error in errors %}
+  > <message role="assistant">{{ error.response }}</message>
+  > <message role="user">
+  > {{ error.message }}
+  > There is an issue with your compiled JSON object!
   > </message>
-  > {% endif %}
+  > {% endfor %}
   > ```
