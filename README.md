@@ -94,7 +94,7 @@ The goal here is to generalize the core ideas I've learned into a reusable, gene
 ```
 
 Notes: 
-- How can I work with validation loops? E.g.,
+- How should I accommodate validation loops? E.g.,
   > ```liquid
   > {% for error in errors %}
   > <message role="assistant">{{ error.response }}</message>
