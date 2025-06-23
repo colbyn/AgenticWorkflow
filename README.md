@@ -2,6 +2,20 @@
 
 Working on a new DSL, a rewrite of the basic implementation from [WebCompiler](https://github.com/SuperSwiftDev/WebCompiler).
 
+What I particularly love about the current system is that it can accommodate intermediate evaluations, for instance, chain of prompt reasoning via the breakpoint message where the LLM outputs will be substituted into a message element based on the provided role. E.g.
+```html
+<prompt name="question-1">
+    <message role="system">You are a helpful assistant.</message>
+    <message role="user">What is heavier, a kilo of feathers or a pound of steel?</message>
+    <message-breakpoint role="assistant"></message-breakpoint>
+    <message role="user">Explain your reasoning.</message>
+    <message-breakpoint role="assistant"></message-breakpoint>
+    <message role="user">Would you like to revise your answer?</message>
+    <message-breakpoint role="assistant"></message-breakpoint>
+    <message role="user">Finally, after considering your thoughts, please state just the answer.</message>
+</prompt>
+```
+
 ## Background 
 
 I've built complex pipelines that composed LLMs for generating 'publication quality' datasets. 
