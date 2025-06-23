@@ -8,7 +8,7 @@ I've built complex pipelines that composed LLMs for generating 'publication qual
 
 Here is an example, for generating dictionary datasets.
 
-```html:liquid
+```liquid
 <prompt name="process">
 <message role="system">
 {% if errors.size > 2 %}
@@ -95,7 +95,7 @@ The goal here is to generalize the core ideas I've learned into a reusable, gene
 
 Notes: 
 - How can I work with validation loops? E.g.,
-  > ```html:liquid
+  > ```liquid
   > {% if errors.size > 0 %}
   > <message role="system">
   > Follow these instructions:
