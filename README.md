@@ -3,66 +3,87 @@
 Overall, I'm attempting to generalize some techniques I've learned from this project as presented/demonstrated in this [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O): **'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**.
 
 
-# Work In Progress 
+# Example
 
-Working on a new DSL, a rewrite of the basic implementation from [WebCompiler](https://github.com/SuperSwiftDev/WebCompiler).
+## Execute
 
-What I particularly love about the current system is that it can accommodate intermediate evaluations, for instance, chain of prompt reasoning via the breakpoint message where the LLM outputs will be substituted into a message element based on the provided role. E.g.
-```html
-<prompt name="question-1">
-    <message role="system">You are a helpful assistant.</message>
-    <message role="user">What is heavier, a kilo of feathers or a pound of steel?</message>
-    <message-breakpoint role="assistant"></message-breakpoint>
-    <message role="user">Explain your reasoning.</message>
-    <message-breakpoint role="assistant"></message-breakpoint>
-    <message role="user">Would you like to revise your answer?</message>
-    <message-breakpoint role="assistant"></message-breakpoint>
-    <message role="user">Finally, after considering your thoughts, please state just the answer.</message>
-</prompt>
+```
+$ cargo run --bin xml-ai -- run notes/StandaloneExamples.html --name question-1 --key-file secrets/open-ai.key --output .xml-ai/latest.json
 ```
 
-## Background 
+> The above will execute the following prompt template:
+> ```html
+> <prompt name="question-1">
+>     <msg role="system">
+>         <p>You are a helpful assistant.</p>
+>     </msg>
+>     <msg role="user">
+>         <p>What is heavier, a kilo of feathers or a pound of steel?</p>
+>     </msg>
+>     <breakpoint role="assistant"></breakpoint>
+>     <msg role="user">
+>         <p>Explain your reasoning.</p>
+>     </msg>
+>     <breakpoint role="assistant"></breakpoint>
+>     <msg role="user">
+>         <p>Would you like to revise your answer?</p>
+>     </msg>
+>     <breakpoint role="assistant"></breakpoint>
+>     <msg role="user">
+>         <p>Finally, after considering your thoughts, please state just the answer.</p>
+>     </msg>
+> </prompt>
+> ```
+> This will result in **4 LLM invocations**.
+> - Three 4 LLM invocations from the `<breakpoint role="assistant"></breakpoint>`
+> - The final unevaluated message will result in a final LLM invocation. 
+> ---
+>
+> **Output example:**
+>
+> > A kilogram of feathers is heavier than a pound of steel. This is due to the difference between the metric and imperial systems of measurement. A kilogram is approximately 2.2 pounds, so a kilogram of any material, feathers included, is heavier than a pound of any other material, steel included.
+> >
+> > ---
+> >
+> > In terms of mass, a kilogram is a larger unit of measurement compared to a pound. Specifically, 1 kilogram is approximately equal to 2.20462 pounds. Therefore, 1 kilogram of any substance, including feathers, will always be heavier than 1 pound of any other substance, including steel. Thus, a kilogram (kilo) of feathers is heavier than a pound of steel.
+> >
+> > ---
+> >
+> > Sorry for any confusion, but there's no need for a revision. The answer is clear in the measurement units: 1 kilogram (kg) of any substance is heavier than 1 pound (lb) of any substance - because 1 kilogram is  approximately equal to 2.20462 pounds. So, 1 kilogram of feathers is indeed heavier than 1 pound of steel.
+> >
+> > ---
+> >
+> > A kilogram of feathers is heavier than a pound of steel.
 
-I've built complex pipelines that composed LLMs for generating 'publication quality' datasets. 
+## Overview
 
-Here is an example, for generating dictionary datasets.
+### Documents
 
-```liquid
-<prompt name="process">
-<message role="system">
-{% if errors.size > 2 %}
-You will fix all JSON syntax errors, JSON schema model validation errors, and then compile the corrected JSON dataset.
-{% else %}
-{{ system_message }}
-{% endif %}
-</message>
-<message role="user">{{ instructions }}</message>
-{% for error in errors %}
-<message role="assistant">{{ error.response }}</message>
-<message role="user">
-{{ error.message }}
-There is an issue with your compiled JSON object!
-</message>
-{% endfor %}
-{% if errors.size > 0 %}
-<message role="system">
-Follow these instructions:
-1. Take heed of the following schema:
+An XML/HTML document is currently a collection of
 
-{{json_schema}}
+- `<prompt>`
 
-2. The task remains: populate the requested JSON object following the provided schema and then return the compiled data.
+#### `<prompt>`
 
-Hint: we do not want the schema but the data the schema represents.
-</message>
-{% endif %}
-</prompt>
-```
+A prompt element will consist of the following
 
-The goal here is to generalize the core ideas I've learned into a reusable, general purpose format. 
+- `<msg>`: A message element.
+- `<breakpoint>`: A breakpoint element; will evaluate all prior messages in the conversation history and then append a new message thereto with the provided `role="[ROLE]"`.
+- `<set>`: Sets/Updates the prompt settings. Unlike my [previous LLM/AI prompt templating format](https://github.com/colbyn/ai-subsystems) since a prompt can itself result in multiple LLM invocations, this needs to be set in a manner that can then be updated throughout the workflow.
 
+##### `<msg>`
 
-## Tentative DSL
+A message element consists of either all text or elements where each element consists of the following:
+
+- `<p>`: A paragraph
+
+The rationale for this design decision is to better control formatting, as demonstrated in my [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O) (**'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**). My philosophy is that all input tokens as part of the prompt engineering text should be as perfect as possible, including ensuring unnecessary whitespace.
+
+# Future work
+
+## JSON dataset generation/population 
+
+I'm considering something akin to the following,
 
 ```html
 <schema src="./schema-1.json" id="schema-1"></schema>
@@ -84,42 +105,7 @@ The goal here is to generalize the core ideas I've learned into a reusable, gene
         <p from="schema" format="pretty"></p>
     </msg>
 </prompt>
-
-
-
-<prompt name="generate-user-profile" input:schema="of type Schema" input:json-value="of type String">
-    <set response-format="json-object"></set>
-    
-    <msg role="system">
-        <p>You are a strict JSON generator. Only return a JSON object conforming to the schema below.</p>
-    </msg>
-
-    <msg role="user">
-        <p>Create a user profile for a new user named Sarah. Include her name, age, and whether she is a
-        premium member.</p>
-    </msg>
-
-    <msg role="user">
-        <p>Here is the JSON schema:</p>
-        <p from="schema" format="pretty"></p>
-    </msg>
-
-    <breakpoint
-        type="msg"
-        role="assistant"
-        verification="schema">
-    </breakpoint>
-</prompt>
 ```
 
-Notes: 
-- How should I accommodate validation loops? E.g.,
-  > ```liquid
-  > {% for error in errors %}
-  > <message role="assistant">{{ error.response }}</message>
-  > <message role="user">
-  > {{ error.message }}
-  > There is an issue with your compiled JSON object!
-  > </message>
-  > {% endfor %}
-  > ```
+But this is something I'm still working on.
+
