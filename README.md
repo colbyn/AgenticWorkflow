@@ -107,5 +107,7 @@ I'm considering something akin to the following,
 </prompt>
 ```
 
-But this is something I'm still working on. In general, verification is a must when designing complex LLM centric workflows as discussed at length in my [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O) (**'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**).
+But this is something I'm still working on. 
+
+In general, verification is a must when designing complex LLM centric workflows as discussed at length in my [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O) (**'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**).
 
