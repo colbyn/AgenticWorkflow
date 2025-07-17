@@ -1,3 +1,8 @@
+# TL;DR
+
+Overall, I'm attempting to generalize some techniques I've learned from this project as presented/demonstrated in this [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O): **'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**.
+
+
 # Work In Progress 
 
 Working on a new DSL, a rewrite of the basic implementation from [WebCompiler](https://github.com/SuperSwiftDev/WebCompiler).
@@ -15,8 +20,6 @@ What I particularly love about the current system is that it can accommodate int
     <message role="user">Finally, after considering your thoughts, please state just the answer.</message>
 </prompt>
 ```
-
-Overall, I'm attempting to generalize some techniques I've learned from this project as presented/demonstrated in this [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O): **'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**.
 
 ## Background 
 
