@@ -3,7 +3,7 @@ use std::rc::Rc;
 use std::str::FromStr;
 
 use crate::ast::breakpoint::BreakpointNode;
-use crate::ast::document::{DocumentChildCode, DocumentNode};
+use crate::ast::document::{DocumentChildNode, DocumentNode};
 use crate::ast::message::MsgNode;
 use crate::ast::prompt::{PromptChildNode, PromptNode};
 use crate::ast::set::SetNode;
@@ -144,11 +144,16 @@ impl BreakpointNode {
         }
         let role = element.attributes
             .get("role")
-            .ok_or_else(|| {
-                InvalidBreakpointAttribute
-            })?;
-        let role = MessageRole::from_str(role.as_str())
-            .map_err(|_| InvalidBreakpointAttribute)?;
+            .map(|x| {
+                MessageRole::from_str(x.as_str())
+            });
+        let role = match role {
+            Some(Ok(x)) => x,
+            None => MessageRole::Assistant,
+            Some(Err(error)) => {
+                return Err(DslFormatErrorList::new(Rc::new(error)))
+            }
+        };
         Ok(Self {
             role,
         })
@@ -176,6 +181,10 @@ impl std::fmt::Display for InvalidBreakpointAttribute {
 }
 impl std::error::Error for InvalidBreakpointAttribute {}
 impl DslFormatError for InvalidBreakpointAttribute {
+    fn singleton(&self) -> DslFormatErrorList { DslFormatErrorList::new(Rc::new(self.clone())) }
+}
+
+impl DslFormatError for crate::common::message::ParseRoleError {
     fn singleton(&self) -> DslFormatErrorList { DslFormatErrorList::new(Rc::new(self.clone())) }
 }
 
@@ -343,10 +352,10 @@ impl DslFormatError for InvalidPromptAttribute {
 // DOCUMENT CHILD NODE
 // ————————————————————————————————————————————————————————————————————————————
 
-impl DocumentChildCode {
+impl DocumentChildNode {
     fn from_element(element: html_ast::Element) -> Result<Self, DslFormatErrorList> {
         if PromptNode::matches(&element.tag) {
-            return PromptNode::from_element(element).map(DocumentChildCode::Prompt)
+            return PromptNode::from_element(element).map(DocumentChildNode::Prompt)
         }
         eprintln!("Failed: {element:?}");
         Err(DslFormatErrorList::new(Rc::new(InvalidDocumentChildNode)))
@@ -372,10 +381,10 @@ impl DslFormatError for InvalidDocumentChildNode {
 
 impl DocumentNode {
     pub fn from_fragment(fragment: html_ast::Fragment) -> Result<Self, DslFormatErrorList> {
-        let mut items = Vec::<DocumentChildCode>::with_capacity(fragment.len());
+        let mut items = Vec::<DocumentChildNode>::with_capacity(fragment.len());
         let mut errors = DslFormatErrorList::with_capacity(fragment.len());
         for child in fragment.extract_elements() {
-            match DocumentChildCode::from_element(child) {
+            match DocumentChildNode::from_element(child) {
                 Ok(item) => {
                     items.push(item);
                 }

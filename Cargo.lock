@@ -246,6 +246,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dev-runner"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "serde_json",
+ "super-html-ast",
+ "super-markdown-ast",
+ "tokio",
+ "toml",
+ "xml-ai-core",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1414,7 +1428,12 @@ dependencies = [
  "indexmap",
  "once_cell",
  "scraper",
+ "super-markdown-ast",
 ]
+
+[[package]]
+name = "super-markdown-ast"
+version = "0.1.0"
 
 [[package]]
 name = "syn"
@@ -2053,6 +2072,7 @@ dependencies = [
  "serde",
  "serde_json",
  "super-html-ast",
+ "super-markdown-ast",
  "tokio",
  "toml",
  "xml-ai-core",

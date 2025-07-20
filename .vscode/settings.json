@@ -15,6 +15,7 @@
         "mixtral",
         "newtypes",
         "OCTO",
+        "punchiness",
         "repr",
         "reqwest",
         "serde",

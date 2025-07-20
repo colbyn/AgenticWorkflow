@@ -8,7 +8,7 @@ Overall, I'm attempting to generalize some techniques I've learned from this pro
 ## Execute
 
 ```
-$ cargo run --bin xml-ai -- run notes/StandaloneExamples.html --name question-1 --key-file secrets/open-ai.key --output .xml-ai/latest.json
+$ cargo run --bin xml-ai -- run samples/standalone-examples.html --name question-1 --key-file secrets/open-ai.key --output .xml-ai/latest.json
 ```
 
 > The above will execute the following prompt template:

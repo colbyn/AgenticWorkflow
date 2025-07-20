@@ -1,4 +1,4 @@
 [workspace]
-members = ["super-html-ast", "xml-ai", "xml-ai-core", "super-ai-client"]
+members = ["super-html-ast", "xml-ai", "xml-ai-core", "super-ai-client", "super-markdown-ast", "dev-runner"]
 
 resolver = "3"  # Use resolver version 3 (recommended for edition 2021/2024)

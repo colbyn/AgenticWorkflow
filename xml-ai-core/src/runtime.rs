@@ -1,10 +1,11 @@
+#![allow(unused)]
 // ————————————————————————————————————————————————————————————————————————————
 // DATA MODEL — SETTINGS
 // ————————————————————————————————————————————————————————————————————————————
 
-use std::ops::Not;
+use std::{collections::HashMap, ops::Not};
 
-use crate::ast::{document::{DocumentChildCode, DocumentNode}, prompt::{PromptChildNode, PromptNode}};
+use crate::ast::{document::{DocumentChildNode, DocumentNode}, prompt::{PromptChildNode, PromptNode}};
 use crate::common::{message::MessageRole, prompt::{PromptSettings, ResponseFormatType}};
 
 #[derive(Debug, Clone)]
@@ -40,6 +41,9 @@ impl Conversation {
     }
 }
 
+// ————————————————————————————————————————————————————————————————————————————
+// DATA MODEL - PROMPT CONTEXT
+// ————————————————————————————————————————————————————————————————————————————
 
 #[derive(Debug, Clone)]
 pub struct PromptContext {
@@ -77,6 +81,34 @@ impl PromptContext {
     }
 }
 
+// ————————————————————————————————————————————————————————————————————————————
+// DATA MODEL - DOCUMENT CONTEXT
+// ————————————————————————————————————————————————————————————————————————————
+
+#[derive(Debug, Clone)]
+pub struct DocumentContext {
+    pub entries: HashMap<String, DocumentChildNode>,
+}
+
+impl DocumentContext {
+    pub fn new(document: DocumentNode) -> Self {
+        let mut entries = HashMap::<String, DocumentChildNode>::with_capacity(document.children.len());
+        for child in document.children {
+            entries.insert(child.name(), child);
+        }
+        Self { entries }
+    }
+    pub fn lookup_prompt(&self, name: impl AsRef<str>) -> Option<&PromptNode> {
+        self.entries
+            .get(name.as_ref())
+            .and_then(|entry| {
+                match entry {
+                    DocumentChildNode::Prompt(prompt) => Some(prompt),
+                }
+            })
+    }
+    // pub async fn 
+}
 
 // ————————————————————————————————————————————————————————————————————————————
 // REQUEST HANDLER
@@ -151,21 +183,24 @@ impl PromptSettings {
 
 impl DocumentNode {
     pub async fn invoke(&self, document_invocation: &DocumentInvocation) -> Result<PromptContext, ()> {
-        for child in self.children.iter() {
-            match child {
-                DocumentChildCode::Prompt(prompt) if prompt.name() == &document_invocation.target_prompt => {
-                    let prompt_context = prompt.invoke(&document_invocation.runtime_environment).await;
-                    return Ok(prompt_context)
-                }
-                DocumentChildCode::Prompt(_) => (),
-            }
+        let document_context = DocumentContext::new(self.clone());
+        if let Some(prompt) = document_context.lookup_prompt(&document_invocation.target_prompt) {
+            let prompt_context = prompt.invoke(
+                &document_context,
+                &document_invocation.runtime_environment,
+            ).await;
+            return Ok(prompt_context)
         }
         Err(())
     }
 }
 
 impl PromptNode {
-    pub async fn invoke(&self, runtime_environment: &RuntimeEnvironment) -> PromptContext {
+    pub async fn invoke(
+        &self,
+        document_context: &DocumentContext,
+        runtime_environment: &RuntimeEnvironment
+    ) -> PromptContext {
         let mut prompt_context = PromptContext::new(runtime_environment.clone());
         for child in self.children.iter() {
             match child {

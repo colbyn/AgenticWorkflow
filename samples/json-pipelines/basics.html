@@ -1,6 +1,4 @@
-<schema src="./schema-1.json" name="schema-1">
-    <fallback prompt="fix-json-object" pipe:json-value></fallback>
-</schema>
+<schema src="./schema-1.json" name="schema-1"></schema>
 
 
 <prompt name="fix-json-object" input:json-value>
@@ -42,4 +40,3 @@
     <set response-format="json-object"></set>
     <breakpoint verification="schema"></breakpoint>
 </prompt>
-
