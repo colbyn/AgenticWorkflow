@@ -122,7 +122,7 @@ In general, verification is a must when designing complex LLM centric workflows 
 
 For now, I'll use the liquid preprocessor for supporting such functionality as shown below:
 
-```html:liquid
+```html
 <prompt name="process">
   <msg role="system">
     {% if errors.size > 2 %}
