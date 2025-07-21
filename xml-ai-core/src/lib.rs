@@ -7,3 +7,4 @@ pub mod parser;
 pub mod runtime;
 pub mod snapshot;
 pub mod normalize;
+pub mod preprocessor;

@@ -2,7 +2,6 @@
 
 Overall, I'm attempting to generalize some techniques I've learned from this project as presented/demonstrated in this [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O): **'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**.
 
-
 # Example
 
 ## Execute
@@ -110,4 +109,58 @@ I'm considering something akin to the following,
 But this is something I'm still working on. 
 
 In general, verification is a must when designing complex LLM centric workflows as discussed at length in my [YouTube video](https://youtu.be/nofJLw51xSk?si=587YwGXe4AB-2u3O) (**'How I autogenerate massive (dictionary) datasets with ChatGPT/LLMs and why this matters'**).
+
+# Updates
+
+## 2025-7-21
+
+### Liquid Support
+
+**Added support for the liquid preprocessor in the `xml-ai-core` crate.**
+
+**Rationale**: It'll take some time before the core compiler functionality is implemented at the level of my [WebCompiler project](https://github.com/SuperSwiftDev/WebCompiler).
+
+For now, I'll use the liquid preprocessor for supporting such functionality as shown below:
+
+```html:liquid
+<prompt name="process">
+  <msg role="system">
+    {% if errors.size > 2 %}
+      <p>
+        You will fix all JSON syntax errors, JSON schema model validation errors, and then compile the corrected JSON
+        dataset.
+      </p>
+    {% else %}
+      <p>{{ system_message }}</p>
+    {% endif %}
+  </msg>
+  <msg role="user">
+    <p>{{ instructions }}</p>
+  </msg>
+  {% for error in errors %}
+    <msg role="assistant">
+      <pre>{{ error.response }}</pre>
+    </msg>
+    <msg role="user">
+      <pre>{{ error.message }}</pre>
+      <p>There is an issue with your compiled JSON object!</p>
+    </msg>
+  {% endfor %}
+  {% if errors.size > 0 %}
+    <msg role="system">
+      <p>Follow these instructions:</p>
+      <p>1. Take heed of the following schema:</p>
+
+      <pre>{{json_schema}}</pre>
+
+      <p>
+        2. The task remains: populate the requested JSON object following the provided schema and then return the
+        compiled data.
+      </p>
+
+      <p>Hint: we do not want the schema but the data the schema represents.</p>
+    </msg>
+  {% endif %}
+</prompt>
+```
 
