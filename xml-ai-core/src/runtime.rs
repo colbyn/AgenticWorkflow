@@ -39,6 +39,9 @@ impl Conversation {
     pub fn already_evaluated(&self) -> bool {
         self.messages.last().map(|x| x.evaluated).unwrap_or(false)
     }
+    pub fn finale_output(&self) -> Result<String, ()> {
+        self.messages.last().map(|x| x.message.content().to_string()).ok_or_else(|| ())
+    }
 }
 
 // ————————————————————————————————————————————————————————————————————————————
