@@ -52,6 +52,7 @@ impl RunCli {
                 api_key,
             },
             target_prompt: String::from(&self.name),
+            inputs: Default::default(),
         };
         let prompt_context = document.invoke(&document_invocation).await.unwrap();
         let conversation_snapshot = prompt_context.to_snapshot();

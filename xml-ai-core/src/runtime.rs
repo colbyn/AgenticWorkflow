@@ -17,6 +17,7 @@ pub struct RuntimeEnvironment {
 pub struct DocumentInvocation {
     pub runtime_environment: RuntimeEnvironment,
     pub target_prompt: String,
+    pub inputs: HashMap<String, String>,
 }
 
 // ————————————————————————————————————————————————————————————————————————————
@@ -126,15 +127,18 @@ async fn invoke(
     use ai_client::request::OpenAiModels;
     let request_builder = prompt_settings.request_builder()
         .with_messages(messages.to_owned())
-        .with_model(OpenAiModels::gpt_4)
+        // .with_model(OpenAiModels::gpt_4)
         .with_stream(true);
     let client_builder = ai_client::client::ClientBuilder::default()
         .with_api_url(URL::OPEN_AI_CHAT_COMPLETIONS)
         .with_api_key(&runtime_environment.api_key)
-        .with_request_body(request_builder)
+        .with_request_body(request_builder.clone())
         .with_logger(ai_client::log::StdErrLogger::default().with_colorize(true));
     let client = client_builder.build_streaming_api_call().unwrap();
     let output_result = client.execute_async().await;
+    if let Some(error) = output_result.as_ref().err() {
+        eprintln!("Failure: {request_builder:#?}")
+    }
     let output = output_result.unwrap();
     output.content(0).unwrap()
 }
@@ -175,6 +179,7 @@ impl PromptSettings {
                 ResponseFormatType::JsonObject => builder.with_response_format(ai_client::request::ResponseFormat::JSON_OBJECT),
             };
         }
+        assert!(builder.model.is_some(), "must define an LLM model");
         builder
     }
 }
@@ -210,13 +215,13 @@ impl PromptNode {
                 PromptChildNode::Msg(msg) => {
                     let message = match msg.role {
                         MessageRole::System => {
-                            ai_client::request::Message::system(msg.text_content())
+                            ai_client::request::Message::system(msg.to_markdown_text())
                         }
                         MessageRole::User => {
-                            ai_client::request::Message::user(msg.text_content())
+                            ai_client::request::Message::user(msg.to_markdown_text())
                         }
                         MessageRole::Assistant => {
-                            ai_client::request::Message::assistant(msg.text_content())
+                            ai_client::request::Message::assistant(msg.to_markdown_text())
                         }
                     };
                     let message = ConversationMessage {

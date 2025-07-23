@@ -5,6 +5,7 @@
         "DSL",
         "endfor",
         "fmt",
+        "htmlescape",
         "indexmap",
         "jsonobject",
         "llamaguard",

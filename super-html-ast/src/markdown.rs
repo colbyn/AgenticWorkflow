@@ -123,7 +123,7 @@ impl Element {
                 .collect::<Vec<_>>();
             return nodes
         }
-        unimplemented!("TODO: {:?}", self.tag.as_normalized())
+        unimplemented!("TODO: {:?}", self)
     }
     fn to_md_inline_nodes(&self) -> Vec<markdown_ast::MdInlineNode> {
         let children = self.children.to_md_inline_nodes();

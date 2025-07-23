@@ -45,6 +45,23 @@ fn json_map_to_liquid_object(map: &Map<String, JsonValue>) -> Object {
 }
 
 // ————————————————————————————————————————————————————————————————————————————
+// HELPERS
+// ————————————————————————————————————————————————————————————————————————————
+
+use html_escape::{encode_safe, decode_html_entities};
+
+/// Escape HTML special characters like `<`, `>`, `&`, `"` and `'`
+pub fn escape_html(input: &str) -> String {
+    encode_safe(input).to_string()
+}
+
+/// Unescape HTML entities like `&lt;`, `&gt;`, `&amp;`, etc.
+pub fn unescape_html(input: &str) -> String {
+    decode_html_entities(input).to_string()
+}
+
+
+// ————————————————————————————————————————————————————————————————————————————
 // ENTRYPOINT
 // ————————————————————————————————————————————————————————————————————————————
 

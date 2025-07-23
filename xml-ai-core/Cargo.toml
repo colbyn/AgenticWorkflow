@@ -8,6 +8,9 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"]}
 toml = "0.8.22"
 liquid = "0.26.4"
+# ammonia = "4.1.1"
+# v_htmlescape = "0.15.8"
+html-escape = "0.2.13"
 
 super-html-ast = { path = "../super-html-ast" }
 super-ai-client = { path = "../super-ai-client" }
